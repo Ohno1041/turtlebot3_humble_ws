@@ -1,0 +1,13 @@
+# Build and Install directories
+build/
+install/
+log/
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyd
+
+# Gazebo/ROS specific files (Optional but good practice)
+.vscode/
+.DS_Store
