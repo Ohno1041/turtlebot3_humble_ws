@@ -1,0 +1,43 @@
+// ~/ros2_ws/.devcontainer/devcontainer.json
+{
+    // コンテナビルドのベースとして、ワークスペースにあるDockerfileを参照
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": ".."
+    },
+
+    "runArgs": [
+        "--network=host",
+        "--privileged",
+        "--device=/dev/dri:/dev/dri",
+        "-e", "DISPLAY=${env:DISPLAY}",
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix"
+    ],
+    // コンテナ名を設定（任意）
+    "name": "ROS 2 TurtleBot3 Dev Container",
+
+    "initializeCommand": "xhost +",
+
+    "remoteEnv": {
+        // Gazeboのキャッシュを隔離し、クリーンな状態で起動させます
+        "HOME": "/tmp/clean_home",
+        // Gazebo Sim (Ignition) の Fuel Server 参照を無効化します
+        "GZ_FUEL_CACHE_PATH": "/tmp/clean_fuel_cache",
+        "IGN_FUEL_CACHE_PATH": "/tmp/clean_fuel_cache",
+        "GAZEBO_FUEL_SERVER": "0.0.0.0",
+        "GAZEBO_MODEL_PATH": "/workspaces/ros2_ws/install/turtlebot3_gazebo/share/turtlebot3_gazebo/models"
+    },
+    // コンテナ接続後に自動でインストールされるVS Code拡張機能を指定
+    // ROS開発に役立つ拡張機能の例です
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",             // C++開発
+                "ms-python.python",               // Python開発
+                "eamodio.gitlens",                // Git操作の強化
+                "GitHub.copilot"                  // Copilot (サブスクリプション必要)
+            ]
+        }
+    },
+    
+}
