@@ -2,12 +2,37 @@
 * 取り組み課題１
 ### コンテナビルド
 * VScodeを使用し、「開発コンテナを開く」でコンテナをビルドしてください。
-### gazebo起動
-* 以下のコマンドで起動してください。
 
-`ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py`
+**ネイティブUbuntu環境での追加設定:**
+```bash
+# X11フォワーディングを許可
+xhost +local:docker
+```
+
+**WSL2環境:**
+* 最新のWindows 11またはWindows 10（バージョン21H2以降）では、WSLgが標準で有効になっているため、追加設定は不要です。
+* 古いWindowsバージョンの場合は、VcXsrvなどのX Serverを起動してください。
+### gazebo起動
+* 環境チェックとGazebo起動の前に以下を実行することをお勧めします：
+
+```bash
+bash /workspaces/turtlebot3_humble_ws/check_gazebo_env.sh
+```
+
+* 環境チェックが成功したら、以下のコマンドで起動してください。
+
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
+
+**トラブルシューティング:**
+* Gazeboが起動しない場合：
+  1. `bash /workspaces/turtlebot3_humble_ws/check_gazebo_env.sh` で環境をチェック
+  2. ネイティブUbuntu: ホスト側で `xhost +local:docker` を実行
+  3. WSL2: 通常は自動で動作します。問題がある場合はWindowsの更新を確認
 
 (注)起動してもタートルボットが出現しない場合はもう一度起動し直してください。
+
 (注)今回はburgerを使用する。
 ### Navigation2の起動
 * 新しいターミナルで以下のコマンドを実行してください。

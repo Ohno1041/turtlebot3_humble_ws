@@ -12,18 +12,25 @@
         "--network=host",
         "--privileged",
         "--shm-size=1gb",
+        // GPU アクセス（ネイティブUbuntu用）
         "--device=/dev/dri:/dev/dri",
         "--device=/dev/dxg:/dev/dxg",
-        // WSLg用のソケットマウント
-        "-v", "/tmp/.X11-unix:/tmp/.X11-unix",
-        "-v", "/mnt/wslg:/mnt/wslg",
-        // WSL2のグラフィックドライバをマウント
-        "-v", "/usr/lib/wsl:/usr/lib/wsl",
-        // ディスプレイ環境変数を固定
-        "-e", "DISPLAY=:0",
+        // X11 Unix ソケットマウント（WSL2とネイティブ両対応）
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw",
+        // WSLg用のソケットマウント（WSL2環境でのみ有効）
+        "-v", "/mnt/wslg:/mnt/wslg:rw",
+        // WSL2のグラフィックドライバをマウント（WSL2環境でのみ有効）
+        "-v", "/usr/lib/wsl:/usr/lib/wsl:rw",
+        // ネイティブUbuntu用のAdditional GPU drivers
+        "-v", "/usr/share/glvnd/egl_vendor.d:/usr/share/glvnd/egl_vendor.d:ro",
+        "-v", "/usr/lib/x86_64-linux-gnu:/usr/lib/host:ro",
+        // 環境変数
+        "-e", "DISPLAY=${DISPLAY:-:0}",
         "-e", "WAYLAND_DISPLAY=wayland-0",
-        "-e", "XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir",
-        "-e", "PULSE_SERVER=/mnt/wslg/PulseServer"
+        "-e", "XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/mnt/wslg/runtime-dir}",
+        "-e", "PULSE_SERVER=${PULSE_SERVER:-/mnt/wslg/PulseServer}",
+        "-e", "LIBGL_ALWAYS_INDIRECT=0",
+        "-e", "LIBGL_ALWAYS_SOFTWARE=0"
     ],
 
     "postCreateCommand": "/usr/local/bin/setup_dev_workspace.sh && echo 'Container and workspace setup complete!'",

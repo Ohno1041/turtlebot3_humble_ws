@@ -12,9 +12,19 @@ RUN echo '#!/bin/bash' > /usr/local/bin/detect_environment.sh && \
     echo 'if [ -d "/usr/lib/wsl" ]; then' >> /usr/local/bin/detect_environment.sh && \
     echo '    echo "WSL2_ENV=true"' >> /usr/local/bin/detect_environment.sh && \
     echo '    echo "LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    echo "DISPLAY=:0"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    echo "WAYLAND_DISPLAY=wayland-0"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    echo "XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    echo "PULSE_SERVER=/mnt/wslg/PulseServer"' >> /usr/local/bin/detect_environment.sh && \
     echo 'else' >> /usr/local/bin/detect_environment.sh && \
     echo '    echo "WSL2_ENV=false"' >> /usr/local/bin/detect_environment.sh && \
     echo '    echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    # ネイティブUbuntu環境でのDISPLAY設定' >> /usr/local/bin/detect_environment.sh && \
+    echo '    if [ -z "$DISPLAY" ]; then' >> /usr/local/bin/detect_environment.sh && \
+    echo '        echo "DISPLAY=:0"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    else' >> /usr/local/bin/detect_environment.sh && \
+    echo '        echo "DISPLAY=$DISPLAY"' >> /usr/local/bin/detect_environment.sh && \
+    echo '    fi' >> /usr/local/bin/detect_environment.sh && \
     echo 'fi' >> /usr/local/bin/detect_environment.sh && \
     chmod +x /usr/local/bin/detect_environment.sh
 
@@ -29,12 +39,23 @@ RUN apt-get update && apt-get install -y \
     ros-humble-ros2-controllers \
     ros-humble-dynamixel-sdk \
     x11-xserver-utils \
+    x11-utils \
+    xauth \
+    xvfb \
+    dbus-x11 \
+    mesa-utils \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    libglapi-mesa \
+    libglu1-mesa \
+    libegl1-mesa \
+    libgles2-mesa \
+    libosmesa6 \
     nano \
     git \
     python3-colcon-common-extensions \
     python3-rosdep \
     python3-pip \
-    mesa-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # 【追加】必要なPythonライブラリをインストール
@@ -81,6 +102,7 @@ RUN echo "# Gazebo GUI設定（プラットフォーム共通）" >> /root/.bash
 RUN echo "export GAZEBO_GUI=false" >> /root/.bashrc
 RUN echo "export LIBGL_ALWAYS_SOFTWARE=1" >> /root/.bashrc
 RUN echo "export QT_X11_NO_MITSHM=1" >> /root/.bashrc
+RUN echo "export LIBGL_ALWAYS_INDIRECT=0" >> /root/.bashrc
 
 # 開発用ワークスペースの初期化
 RUN mkdir -p /workspaces && \
@@ -91,6 +113,7 @@ RUN mkdir -p /workspaces && \
     echo "export GAZEBO_GUI=false" >> /tmp/setup_workspace.sh && \
     echo "export LIBGL_ALWAYS_SOFTWARE=1" >> /tmp/setup_workspace.sh && \
     echo "export QT_X11_NO_MITSHM=1" >> /tmp/setup_workspace.sh && \
+    echo "export LIBGL_ALWAYS_INDIRECT=0" >> /tmp/setup_workspace.sh && \
     chmod +x /tmp/setup_workspace.sh
 
 # .bashrc の設定を更新
@@ -119,5 +142,9 @@ RUN echo '#!/bin/bash' > /usr/local/bin/setup_dev_workspace.sh && \
 RUN echo 'if [ -d "/workspaces/turtlebot3_humble_ws" ]; then' >> /root/.bashrc && \
     echo '  /usr/local/bin/setup_dev_workspace.sh' >> /root/.bashrc && \
     echo 'fi' >> /root/.bashrc
+
+# Gazebo起動前チェックスクリプトをコピー（後でワークスペースから上書きされる）
+COPY check_gazebo_env.sh /usr/local/bin/check_gazebo_env.sh
+RUN chmod +x /usr/local/bin/check_gazebo_env.sh
 
 CMD ["bash"]
