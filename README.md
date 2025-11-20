@@ -46,6 +46,12 @@
 
 ![](image/scr2.png)
 
+### 障害物の削除
+
+`ros2 service call /delete_entity gazebo_msgs/srv/DeleteEntity "{name: '障害物の名前'}"`
+
+* 障害物の名前は`custom_obs_x座標_y座標`です。(例(x,y)=(0.5,0.0)のとき、`custom_obs_0_5_0_0`)
+
 ### タートルボットの現在位置の取得
 * 新しいターミナルで以下のコマンドを実行
 
